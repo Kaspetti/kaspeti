@@ -1,4 +1,4 @@
-module Page.Home exposing (Model, Msg, init, update, view)
+module Page.Me exposing (Model, Msg, init, update, view)
 
 import Element exposing (..)
 
@@ -17,6 +17,7 @@ update : Msg -> Model -> (Model, Cmd Msg)
 update msg model = ( model, Cmd.none )
 
 
+
 view : Model -> Element Msg
 view model =
-  el [] (text "home")
+  el [] (text "me")

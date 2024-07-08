@@ -7,8 +7,12 @@ import Browser.Navigation as Nav
 import Url
 
 import Element exposing (..)
+import Element.Font as Font
 
 import Page.Home as Home
+import Page.Me as Me
+import Page.Projects as Projects
+import Page.Site as Site
 
 import Route
 
@@ -16,12 +20,18 @@ import Route
 type Model 
   = NotFound Nav.Key
   | Home Nav.Key Home.Model
+  | Me Nav.Key Me.Model
+  | Projects Nav.Key Projects.Model
+  | Site Nav.Key Site.Model
 
 
 type Msg
   = LinkClicked Browser.UrlRequest
   | UrlChanged Url.Url
   | HomeMsg Home.Msg
+  | MeMsg Me.Msg
+  | ProjectsMsg Projects.Msg
+  | SiteMsg Site.Msg
 
 
 main : Program () Model Msg
@@ -50,6 +60,15 @@ updateUrl url model =
     Just Route.Home ->
       updateWith (Home key) HomeMsg Home.init
 
+    Just Route.Me ->
+      updateWith (Me key) MeMsg Me.init
+
+    Just Route.Projects ->
+      updateWith (Projects key) ProjectsMsg Projects.init
+
+    Just Route.Site ->
+      updateWith (Site key) SiteMsg Site.init
+
     Nothing ->
       ( NotFound key, Cmd.none )
 
@@ -65,13 +84,24 @@ view : Model -> Browser.Document Msg
 view model = 
   { title = "Kaspeti" 
   , body = 
-    [ layout [] <| 
-        case model of
+    [ layout [] (column [] 
+      [ navigation model
+      , case model of
           NotFound _ ->
             text "404 Not Found"
 
           Home _ homeModel ->
             map HomeMsg (Home.view homeModel)
+
+          Me _ meModel ->
+            map MeMsg (Me.view meModel)
+
+          Projects _ projectsModel ->
+            map ProjectsMsg (Projects.view projectsModel)
+
+          Site _ siteModel ->
+            map SiteMsg (Site.view siteModel)
+      ])
     ]
   }
 
@@ -96,6 +126,15 @@ update msg model =
     (HomeMsg subMsg, Home key homeModel) ->
       updateWith (Home key) HomeMsg (Home.update subMsg homeModel)
 
+    (MeMsg subMsg, Me key meModel) ->
+      updateWith (Me key) MeMsg (Me.update subMsg meModel)
+      
+    (ProjectsMsg subMsg, Projects key projectsModel) ->
+      updateWith (Projects key) ProjectsMsg (Projects.update subMsg projectsModel)
+
+    (SiteMsg subMsg, Site key siteModel) ->
+      updateWith (Site key) SiteMsg (Site.update subMsg siteModel)
+
     (_, _) ->
       ( model, Cmd.none )
 
@@ -110,3 +149,56 @@ toKey model =
   case model of
     NotFound k -> k
     Home k _ -> k
+    Me k _ -> k
+    Projects k _ -> k
+    Site k _ -> k
+
+
+toRoute : Model -> Route.Route
+toRoute model = 
+  case model of
+    NotFound _ -> Route.Home
+    Home _ _ -> Route.Home
+    Me _ _-> Route.Me
+    Projects _ _ -> Route.Projects
+    Site _ _ -> Route.Site
+
+
+
+navigation : Model -> Element.Element msg
+navigation model =
+  let 
+      currentRoute = toRoute model
+  in
+  Element.row [ padding 10, spacing 15, centerX ]
+  [ link ( naviagtionStyle Route.Home currentRoute )
+    { url = "/"
+    , label = text "home"
+    }
+  , text "|"
+  , link ( naviagtionStyle Route.Me currentRoute )
+    { url = "/me"
+    , label = text "about me"
+    }
+  , text "|"
+  , link ( naviagtionStyle Route.Projects currentRoute )
+    { url = "/projects"
+    , label = text "projects"
+    }
+  , text "|"
+  , link ( naviagtionStyle Route.Site currentRoute )
+    { url = "/site"
+    , label = text "this site"
+    }
+  ]
+
+
+naviagtionStyle : Route.Route -> Route.Route -> List (Attribute msg)
+naviagtionStyle linkRoute currentRoute = 
+  [ centerX
+  , Font.underline
+  , if currentRoute == linkRoute then
+      Font.color (rgb 0 0.5 0.25)
+    else
+      Font.color (rgb 0 0 0)
+  ]
