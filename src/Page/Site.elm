@@ -1,6 +1,8 @@
 module Page.Site exposing (Model, Msg, init, update, view)
 
 import Element exposing (..)
+import Element.Region as Region
+import Element.Font as Font
 
 
 type alias Model = {}
@@ -20,4 +22,4 @@ update msg model = ( model, Cmd.none )
 
 view : Model -> Element Msg
 view model =
-  el [] (text "site")
+  el [ Region.heading 1, Font.size 36, centerX ] (text "Site")

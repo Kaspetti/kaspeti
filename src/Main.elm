@@ -84,7 +84,7 @@ view : Model -> Browser.Document Msg
 view model = 
   { title = "Kaspeti" 
   , body = 
-    [ layout [] (column [] 
+    [ layout [] (column [ centerX ] 
       [ navigation model
       , case model of
           NotFound _ ->
